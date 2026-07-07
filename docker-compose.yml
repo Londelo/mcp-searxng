@@ -2,9 +2,10 @@ services:
   mcp-searxng:
     image: isokoliuk/mcp-searxng:latest
     ports:
-      - "8080:8080"
+      - "${MCP_PORT:-3001}:${MCP_HTTP_PORT:-3001}"
+    env_file: .env
     environment:
-      - MCP_HTTP_PORT=8080
+      - MCP_HTTP_PORT=${MCP_HTTP_PORT:-3001}
       - MCP_HTTP_HOST=0.0.0.0
-      - SEARXNG_URL=https://searxng.example.com
+      - SEARXNG_URL=${SEARXNG_URL:-http://localhost:8080}
     restart: unless-stopped
