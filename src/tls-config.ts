@@ -95,11 +95,20 @@ export function getSystemCACerts(deps: CACertDeps = {}): string | null {
  * if no system CA bundle is found (undici uses Node's compiled-in Mozilla
  * bundle in that case).
  *
+ * When `NODE_SKIP_SYSTEM_CA=1` is set, always returns an empty object so
+ * undici falls back to Node's default trust store (Mozilla roots baked into
+ * the Node binary). This is useful when the system CA bundle is stale or
+ * otherwise unsuitable (e.g. Alpine images where the bundle predates recent
+ * root rotations and cannot be updated at container startup).
+ *
  * Usage:
  *   new Agent({ connect: getConnectOptions() })
  *   new ProxyAgent({ uri: proxyUrl, connect: getConnectOptions() })
  */
 export function getConnectOptions(deps: CACertDeps = {}): { ca: string } | Record<string, never> {
+  if (process.env.NODE_SKIP_SYSTEM_CA === "1") {
+    return {};
+  }
   const ca = getSystemCACerts(deps);
   return ca !== null ? { ca } : {};
 }
